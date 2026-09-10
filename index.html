@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>سجل الاستدعاء الإلكتروني</title>
+<style>
+:root{
+  --navy:#102a43; --gold:#d4a62a; --bg:#f5f7fa; --card:#fff; --text:#1f2937;
+  --muted:#667085; --line:#d8dee9; --green:#128C7E; --red:#b42318;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Tahoma,Arial,sans-serif;background:var(--bg);color:var(--text)}
+.topbar{background:linear-gradient(135deg,#102a43,#173f63);color:white;padding:22px 16px;text-align:center;border-bottom:4px solid var(--gold)}
+.topbar h1{margin:0;font-size:28px}.topbar p{margin:6px 0 0;opacity:.9}
+.container{max-width:1100px;margin:22px auto;padding:0 14px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.card{background:var(--card);border:1px solid #e4e7ec;border-radius:16px;padding:18px;box-shadow:0 6px 22px rgba(16,42,67,.07)}
+.card h2{margin:0 0 14px;color:var(--navy);font-size:20px}
+label{display:block;font-weight:700;margin:10px 0 6px}
+input,select,textarea{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;font-size:15px;background:white}
+textarea{min-height:110px;resize:vertical}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:15px}
+button{border:0;border-radius:10px;padding:11px 15px;font-size:15px;font-weight:700;cursor:pointer}
+.primary{background:var(--navy);color:white}.gold{background:var(--gold);color:#17202a}
+.whatsapp{background:var(--green);color:white}.light{background:#eef2f6;color:var(--navy)}
+.danger{background:#fee4e2;color:var(--red)}
+.note{font-size:13px;color:var(--muted);line-height:1.8}
+.preview-wrap{background:#eef2f6;border-radius:12px;padding:12px;overflow:auto}
+canvas{display:block;max-width:100%;height:auto;margin:auto;background:white;border-radius:8px;box-shadow:0 5px 18px rgba(0,0,0,.08)}
+.tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:0 0 18px}
+.tabs .tab{padding:10px 3px;font-size:13px;white-space:nowrap}
+.tab{background:#e9eef5;color:var(--navy)}.tab.active{background:var(--navy);color:white}
+.section{display:none}.section.active{display:block}
+.table-wrap{overflow:auto}
+table{width:100%;border-collapse:collapse;min-width:850px}
+th,td{border-bottom:1px solid #e5e7eb;padding:10px;text-align:right;font-size:14px}
+th{background:#f8fafc;color:var(--navy)}
+.badge{padding:4px 8px;border-radius:999px;font-size:12px;font-weight:700}
+.wait{background:#fff4cc;color:#8a6400}.done{background:#dff7e8;color:#176b3a}.miss{background:#fee4e2;color:#9e1c17}
+.footer{text-align:center;color:#667085;padding:28px 10px 35px;font-size:13px}
+.settings-box{margin-bottom:18px}
+@media(max-width:800px){.grid{grid-template-columns:1fr}.row{grid-template-columns:1fr}.topbar h1{font-size:23px}}
+</style>
+
+<style id="final-pwa-polish">
+  .main-tabs,.tabs,.top-tabs{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:5px!important}
+  .summons-actions,.action-row,.actions.final-actions{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:5px!important}
+  .summons-actions button,.action-row button,.actions.final-actions button{
+    min-width:0!important;white-space:nowrap!important;padding:10px 4px!important;font-size:12px!important
+  }
+  @media(max-width:520px){
+    .summons-actions button,.action-row button,.actions.final-actions button{font-size:10.5px!important;padding:9px 2px!important}
+  }
+  #installAppBtn{display:none}
+</style>
+<link rel="manifest" href="./manifest.webmanifest">
+<meta name="theme-color" content="#071f3e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="سجل الاستدعاء">
+<link rel="apple-touch-icon" href="./icons/icon-192.png">
+
+
+<style id="approved-action-row">
+  .summons-actions,.action-row,.actions.final-actions,.actions{
+    display:grid !important;
+    grid-template-columns:repeat(4,minmax(0,1fr)) !important;
+    gap:4px !important;
+  }
+  .summons-actions button,.action-row button,.actions.final-actions button,.actions button{
+    min-width:0 !important;
+    white-space:nowrap !important;
+  }
+  @media(max-width:520px){
+    .summons-actions button,.action-row button,.actions.final-actions button,.actions button{
+      font-size:10px !important;
+      padding:9px 2px !important;
+    }
+  }
+</style>
+
+<style id="sms-actions">
+.action-row,.actions,.summons-actions,.actions.final-actions{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:4px!important}
+.action-row button,.actions button,.summons-actions button,.actions.final-actions button{min-width:0!important;white-space:nowrap!important;padding:9px 2px!important}
+@media(max-width:520px){.action-row button,.actions button,.summons-actions button,.actions.final-actions button{font-size:8.5px!important}}
+</style></head>
+<body>
+<header class="topbar">
+  <h1>سجل الاستدعاء الإلكتروني</h1>
+  <p>لأولياء أمور التلاميذ</p>
+</header>
+
+<div class="container">
+  <div class="tabs">
+    <button class="tab active" data-tab="create">إنشاء استدعاء</button>
+    <button class="tab" data-tab="records">سجل الاستدعاءات</button>
+    <button class="tab" data-tab="settings">إعدادات المدرسة</button>
+  </div>
+
+  <section id="create" class="section active">
+    <div class="grid">
+      <div class="card">
+        <h2>بيانات الاستدعاء</h2>
+        <div class="row">
+          <div>
+            <label>اسم التلميذ</label>
+            <input id="studentName" placeholder="الاسم الرباعي">
+          </div>
+          <div>
+            <label>الصف</label>
+            <select id="grade">
+              <option value="">اختر الصف</option>
+              <option>الأول الابتدائي</option><option>الثاني الابتدائي</option><option>الثالث الابتدائي</option>
+              <option>الرابع الابتدائي</option><option>الخامس الابتدائي</option><option>السادس الابتدائي</option>
+            </select>
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label>الشعبة</label>
+            <select id="sectionName"><option value="">بدون شعبة</option><option>أ</option><option>ب</option><option>ج</option><option>د</option></select>
+          </div>
+          <div>
+            <label>رقم ولي الأمر</label>
+            <input id="phone" inputmode="numeric">
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label>اليوم</label>
+            <select id="day">
+              <option>الأحد</option><option>الاثنين</option><option>الثلاثاء</option><option>الأربعاء</option><option>الخميس</option>
+            </select>
+          </div>
+          <div>
+            <label>التاريخ</label>
+            <input id="date" type="date">
+          </div>
+          <div>
+            <label>الوقت</label>
+            <input id="time" type="time" value="10:00">
+          </div>
+        </div>
+        <label>ملاحظة داخلية للمرشد (لا تظهر لولي الأمر)</label>
+        <textarea id="internalNote" placeholder="اختياري: سبب الاستدعاء أو ملاحظات المتابعة"></textarea>
+
+        <div class="actions">
+          <button class="primary" id="generateBtn">إنشاء الاستدعاء</button>
+          <button class="light" id="newBtn">استدعاء جديد</button>
+          <button class="whatsapp" id="shareBtn">إرسال عبر واتساب</button>
+<button class="light" id="smsBtn">إرسال رسالة نصية</button>
+          <button class="gold" id="saveImageBtn">حفظ نسخة</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>معاينة الاستدعاء</h2>
+        <div class="preview-wrap">
+          <canvas id="invitationCanvas" width="1080" height="1350"></canvas>
+        </div>
+        <label>النص الجاهز لولي الأمر</label>
+        <textarea id="messagePreview" readonly></textarea>
+      </div>
+    </div>
+  </section>
+
+  <section id="records" class="section">
+    <div class="card">
+      <h2>سجل الاستدعاءات</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>التاريخ</th><th>التلميذ</th><th>الصف</th><th>الهاتف</th><th>الحالة</th><th>الملاحظة</th><th>إجراءات</th></tr></thead>
+          <tbody id="recordsBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section id="settings" class="section">
+    <div class="card settings-box">
+      <h2>إعدادات المدرسة</h2>
+      <p class="note">تُحفظ هذه البيانات على الجهاز وتظهر تلقائيًا في الاستدعاءات الجديدة.</p>
+      <label>اسم المدرسة</label>
+      <input id="schoolName">
+      <label>اسم المرشد التربوي</label>
+      <input id="counselorName" placeholder="الاسم الرباعي">
+      <label>اسم المدير (اختياري)</label>
+      <input id="principalName">
+      <div class="actions"><button class="primary" id="saveSettingsBtn">حفظ الإعدادات</button></div>
+    </div>
+  </section>
+</div>
+
+<div class="footer">إعداد وتصميم: المرشد التربوي قصي زهير سعيد</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const STORAGE_SETTINGS='call_register_settings_v1';
+const STORAGE_RECORDS='call_register_records_v1';
+
+document.querySelectorAll('.tab').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+    btn.classList.add('active'); $(btn.dataset.tab).classList.add('active');
+    if(btn.dataset.tab==='records') renderRecords();
+  });
+});
+
+function loadSettings(){
+  const s=JSON.parse(localStorage.getItem(STORAGE_SETTINGS)||'{}');
+  $('schoolName').value=s.schoolName||'';
+  $('counselorName').value=s.counselorName||'';
+  $('principalName').value=s.principalName||'';
+}
+function getSettings(){
+  return {schoolName:$('schoolName').value.trim(), counselorName:$('counselorName').value.trim(), principalName:$('principalName').value.trim()};
+}
+$('saveSettingsBtn').onclick=()=>{
+  localStorage.setItem(STORAGE_SETTINGS,JSON.stringify(getSettings()));
+  alert('تم حفظ إعدادات المدرسة.');
+  drawInvitation();
+};
+
+function currentData(){
+  return {
+    studentName:$('studentName').value.trim(),
+    grade:$('grade').value,
+    section:$('sectionName').value,
+    phone:$('phone').value.trim(),
+    day:$('day').value,
+    date:$('date').value,
+    time:$('time').value,
+    note:$('internalNote').value.trim()
+  };
+}
+function formattedDate(v){
+  if(!v) return '';
+  const [y,m,d]=v.split('-'); return `${d}/${m}/${y}`;
+}
+function formattedTime(v){
+ if(!v)return '';
+ const [h,m]=v.split(':').map(Number), p=h>=12?'مساءً':'صباحًا', hh=((h+11)%12)+1;
+ return `${hh}:${String(m).padStart(2,'0')} ${p}`;
+}
+function buildMessage(){
+  const s=getSettings(), d=currentData();
+  const classText=[d.grade,d.section?`الشعبة ${d.section}`:''].filter(Boolean).join(' - ');
+  return `السيد ولي أمر التلميذ ${d.studentName||'....................'} المحترم
+تحية طيبة..
+يرجى حضوركم إلى إدارة ${s.schoolName||'المدرسة'} يوم ${d.day||'........'} الموافق ${formattedDate(d.date)||'../../....'} الساعة ${formattedTime(d.time)||'........'}، لأمور تتعلق بالتلميذ.
+الصف: ${classText||'....................'}
+مع الشكر والتقدير.
+${s.counselorName ? `المرشد التربوي: ${s.counselorName}` : ''}`;
+}
+function fitText(ctx, text, maxWidth, startSize=44, minSize=26, weight='700'){
+  let size=startSize;
+  do{ctx.font=`${weight} ${size}px Tahoma, Arial`; if(ctx.measureText(text).width<=maxWidth) break; size-=2;}while(size>minSize);
+  return size;
+}
+function wrapText(ctx,text,x,y,maxWidth,lineHeight){
+  const words=text.split(' '); let line='', lines=[];
+  for(let i=0;i<words.length;i++){
+    const test=line+words[i]+' ';
+    if(ctx.measureText(test).width>maxWidth && line){lines.push(line.trim()); line=words[i]+' ';}
+    else line=test;
+  }
+  if(line) lines.push(line.trim());
+  lines.forEach((ln,i)=>ctx.fillText(ln,x,y+i*lineHeight));
+  return y+lines.length*lineHeight;
+}
+function rr(ctx,x,y,w,h,r,fill,stroke){
+  ctx.beginPath(); ctx.roundRect(x,y,w,h,r);
+  if(fill){ctx.fillStyle=fill;ctx.fill()}
+  if(stroke){ctx.strokeStyle=stroke;ctx.stroke()}
+}
+function drawInvitation(){
+  const c=$('invitationCanvas'),ctx=c.getContext('2d'),s=getSettings(),d=currentData();
+  ctx.clearRect(0,0,c.width,c.height);ctx.fillStyle='#fffdf8';ctx.fillRect(0,0,c.width,c.height);
+  ctx.direction='rtl';ctx.textAlign='center';
+
+  ctx.fillStyle='#102a43';
+  let fs=fitText(ctx,`إدارة ${s.schoolName||'اسم المدرسة'}`,900,50,30);
+  ctx.font=`700 ${fs}px Tahoma,Arial`;ctx.fillText(`إدارة ${s.schoolName||'اسم المدرسة'}`,540,250);
+  ctx.fillStyle='#d4a62a';ctx.fillRect(300,282,480,5);
+
+  rr(ctx,245,335,590,90,22,'#102a43');
+  ctx.fillStyle='#fff';ctx.font='700 43px Tahoma,Arial';ctx.fillText('م / حضور ولي أمر',540,394);
+
+  ctx.fillStyle='#1f2937';ctx.font='31px Tahoma,Arial';
+  wrapText(ctx,'نود إعلامكم بضرورة حضوركم إلى المدرسة لمتابعة بعض الأمور المتعلقة بالتلميذ المذكور أدناه، وذلك في اليوم والتاريخ المحددين.',540,505,850,52);
+
+  ctx.lineWidth=3;rr(ctx,120,690,840,300,24,'#f7f3e8','#d4a62a');
+  ctx.fillStyle='#102a43';ctx.font='700 31px Tahoma,Arial';ctx.textAlign='right';
+  ctx.fillText(`اسم التلميذ: ${d.studentName||'........................................'}`,900,760);
+  ctx.fillText(`الصف: ${d.grade||'........................'}${d.section?`    الشعبة: ${d.section}`:''}`,900,835);
+  ctx.fillText(`اليوم: ${d.day||'................'}`,900,910);
+  ctx.fillText(`التاريخ: ${formattedDate(d.date)||'.... / .... / ....'}`,900,975);
+  ctx.fillText(`الوقت: ${formattedTime(d.time)||'................'}`,900,1030);
+
+  ctx.textAlign='center';ctx.fillStyle='#1f2937';ctx.font='30px Tahoma,Arial';ctx.fillText('مع الشكر والتقدير ..',540,1060);
+  ctx.fillStyle='#102a43';ctx.font='700 32px Tahoma,Arial';
+  if(s.counselorName)ctx.fillText(s.counselorName,815,1180);
+  if(s.principalName)ctx.fillText(s.principalName,265,1180);
+  ctx.fillStyle='#475467';ctx.font='22px Tahoma,Arial';
+  ctx.fillText('المرشد التربوي',815,1225);ctx.fillText('إدارة المدرسة',265,1225);
+
+  ctx.strokeStyle='#d4a62a';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(220,1240);ctx.lineTo(860,1240);ctx.stroke();
+  ctx.fillStyle='#102a43';ctx.font='700 24px Tahoma,Arial';ctx.fillText('معًا .. من أجل مستقبل أفضل لأبنائنا',540,1290);
+  $('messagePreview').value=buildMessage();
+}
+function validate(){
+  const d=currentData(),s=getSettings();
+  if(!s.schoolName){alert('يرجى إدخال اسم المدرسة أولاً من إعدادات المدرسة.'); return false;}
+  if(!d.studentName || !d.grade || !d.date){alert('يرجى إدخال اسم التلميذ والصف والتاريخ.'); return false;}
+  return true;
+}
+function saveRecord(){
+  if(!validate()) return;
+  const arr=JSON.parse(localStorage.getItem(STORAGE_RECORDS)||'[]');
+  const d=currentData();
+  arr.unshift({id:Date.now(),...d,status:'بانتظار المراجعة',createdAt:new Date().toISOString()});
+  localStorage.setItem(STORAGE_RECORDS,JSON.stringify(arr));
+  renderRecords();
+}
+$('generateBtn').onclick=()=>{ if(validate()){drawInvitation(); saveRecord(); alert('تم إنشاء الاستدعاء وحفظه في السجل.');} };
+
+
+$('newBtn').onclick=()=>{
+  $('studentName').value='';$('grade').value='';$('sectionName').value='';
+  $('phone').value='';$('internalNote').value='';
+  $('time').value='10:00';
+  const n=new Date();$('date').value=`${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`;
+  drawInvitation();$('studentName').focus();
+};
+function canvasBlob(){
+  return new Promise(resolve=>$('invitationCanvas').toBlob(resolve,'image/png',0.95));
+}
+$('saveImageBtn').onclick=async()=>{
+  if(!validate()) return; drawInvitation();
+  const blob=await canvasBlob(); const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob); a.download=`استدعاء_${currentData().studentName||'ولي_امر'}.png`; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+};
+function normalizeIraqPhone(p){
+  p=(p||'').replace(/\D/g,'');
+  if(p.startsWith('0')) p='964'+p.slice(1);
+  return p;
+}
+$('shareBtn').onclick=()=>{
+  if(!validate()) return;
+  const phone=normalizeIraqPhone(currentData().phone);
+  if(!phone){ alert('يرجى إدخال رقم هاتف ولي الأمر.'); return; }
+  drawInvitation();
+  const url=`https://wa.me/${phone}?text=${encodeURIComponent(buildMessage())}`;
+  window.open(url,'_blank');
+};
+
+
+function buildSMSMessage(){
+ const d=currentData(), st=getSettings();
+ return `السيد ولي أمر التلميذ ${d.student} المحترم،
+يرجى حضوركم إلى إدارة ${st.schoolName} يوم ${d.day} الموافق ${d.date} لأمور تتعلق بالتلميذ.
+مع الشكر والتقدير.
+المرشد التربوي: ${st.counselorName}`;
+}
+$('smsBtn').onclick=()=>{
+ if(!validate()) return;
+ const phone=normalizeIraqPhone(currentData().phone);
+ if(!phone){alert('يرجى إدخال رقم هاتف ولي الأمر.');return;}
+ const body=encodeURIComponent(buildSMSMessage());
+ const isiOS=/iPad|iPhone|iPod/.test(navigator.userAgent);
+ window.location.href=isiOS?`sms:${phone}&body=${body}`:`sms:${phone}?body=${body}`;
+};
+
+function statusClass(s){return s==='حضر'?'done':s==='لم يحضر'?'miss':'wait'}
+function renderRecords(){
+  const arr=JSON.parse(localStorage.getItem(STORAGE_RECORDS)||'[]');
+  const body=$('recordsBody'); body.innerHTML='';
+  if(!arr.length){body.innerHTML='<tr><td colspan="7" style="text-align:center;color:#667085">لا توجد استدعاءات محفوظة بعد.</td></tr>';return}
+  arr.forEach(r=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td>${formattedDate(r.date)||''}</td><td>${r.studentName}</td>
+      <td>${r.grade}${r.section?' / '+r.section:''}</td><td>${r.phone||'-'}</td>
+      <td><span class="badge ${statusClass(r.status)}">${r.status}</span></td>
+      <td>${r.note||'-'}</td>
+      <td>
+        <select data-status="${r.id}">
+          <option ${r.status==='بانتظار المراجعة'?'selected':''}>بانتظار المراجعة</option>
+          <option ${r.status==='حضر'?'selected':''}>حضر</option>
+          <option ${r.status==='لم يحضر'?'selected':''}>لم يحضر</option>
+        </select>
+        <button class="danger" data-delete="${r.id}" style="margin-top:6px">حذف</button>
+      </td>`;
+    body.appendChild(tr);
+  });
+  body.querySelectorAll('[data-status]').forEach(sel=>sel.onchange=()=>{
+    const id=+sel.dataset.status; let arr=JSON.parse(localStorage.getItem(STORAGE_RECORDS)||'[]');
+    arr=arr.map(r=>r.id===id?{...r,status:sel.value}:r); localStorage.setItem(STORAGE_RECORDS,JSON.stringify(arr)); renderRecords();
+  });
+  body.querySelectorAll('[data-delete]').forEach(btn=>btn.onclick=()=>{
+    if(!confirm('هل تريد حذف هذا الاستدعاء؟')) return;
+    const id=+btn.dataset.delete; let arr=JSON.parse(localStorage.getItem(STORAGE_RECORDS)||'[]').filter(r=>r.id!==id);
+    localStorage.setItem(STORAGE_RECORDS,JSON.stringify(arr)); renderRecords();
+  });
+}
+loadSettings();
+const t=new Date(); $('date').value=`${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`;
+drawInvitation();
+
+
+</script>
+
+<div style="max-width:1100px;margin:12px auto;padding:0 14px;text-align:center">
+  <button id="installAppBtn" type="button" style="border:0;border-radius:12px;padding:11px 18px;background:#071f3e;color:#fff;font-family:inherit;font-weight:700;cursor:pointer">
+    تثبيت البرنامج
+  </button>
+</div>
+<script id="pwa-install-script">
+let deferredInstallPrompt=null;
+const installBtn=document.getElementById('installAppBtn');
+window.addEventListener('beforeinstallprompt',(e)=>{
+  e.preventDefault(); deferredInstallPrompt=e;
+  if(installBtn) installBtn.style.display='inline-block';
+});
+if(installBtn){
+  installBtn.addEventListener('click',async()=>{
+    if(deferredInstallPrompt){
+      deferredInstallPrompt.prompt();
+      await deferredInstallPrompt.userChoice;
+      deferredInstallPrompt=null;
+      installBtn.style.display='none';
+    } else {
+      alert('على iPhone: افتح زر المشاركة ثم اختر "إضافة إلى الشاشة الرئيسية".');
+    }
+  });
+}
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+}
+</script>
+
+<style id="final-five-actions">
+.action-row,.actions,.summons-actions,.actions.final-actions{
+ display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:4px!important;
+}
+.action-row button,.actions button,.summons-actions button,.actions.final-actions button{
+ min-width:0!important;white-space:nowrap!important;padding:9px 2px!important;
+}
+@media(max-width:520px){
+ .action-row button,.actions button,.summons-actions button,.actions.final-actions button{font-size:9.5px!important}
+}
+</style>
+</body>
+</html>
